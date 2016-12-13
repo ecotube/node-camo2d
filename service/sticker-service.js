@@ -23,7 +23,6 @@ function generateFile(reqBody){
     // temporary solution
     for(var key in reqBody){ params = JSON.parse(key);}
     for(var i in params){
-        params[i].type = 1;
         params[i].scaleHeigthtOffset = 0;
         params[i].alignPos = 0;
         params[i].alignX = 0;

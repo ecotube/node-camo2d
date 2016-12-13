@@ -65,29 +65,6 @@ var pointConfig = {
 
 $(document).ready(function(){
     setModelParam();
-
-    //$(document).on('click', '.sticker-div', function(){
-    //    currentStickerIndex = $(this).index();
-    //    if($("#sticker_" + currentStickerIndex).size() != 0){
-    //        useLastStickerConfig();
-    //    }else{
-    //        stickerChosen($(this).parent());
-    //        addStickerToModel(calculatePos());
-    //        dragNResize();
-    //    }
-    //});
-    //// init sticker
-    //$(".sticker-div").click(function(){
-    //    currentStickerIndex = $(this).index();
-    //    if($("#sticker_" + currentStickerIndex).size() != 0){
-    //        useLastStickerConfig();
-    //    }else{
-    //        stickerChosen($(this).parent());
-    //        addStickerToModel(calculatePos());
-    //        dragNResize();
-    //    }
-    //});
-
     // upload sticker
     $("#uploader").click(function(){ $("#media").click();});
     $(document).on('change', 'input#media', function(){ ajaxFileUpload(); });
@@ -99,8 +76,20 @@ $(document).ready(function(){
     // choose sticker center
     $("input[type='radio']").click(function(){
         if(noActiveSticker()) return;
-
     });
+
+    $("#continue").click(function(){
+        $("#model>div, .uploaded>div").remove();
+        stickersConfig = [];
+        $("input[type='checkbox']").prop('checked', false);
+        $("input.sticker-param").val('');
+        scrollTo(0,0);
+    });
+
+    // checkbox
+    $("#none_facial").click(function(){
+      refineCssStickerOnModel();
+    })
 });
 
 function noActiveSticker(){
@@ -133,22 +122,24 @@ function uploadConfig(){
         error: function(){
             notify('上传错误, 请稍后再试');
         }
-
     })
 }
 
 function finishSticker(){
     var config = {};
-    config.facePos = parseInt(getPosIndex(), 10);
-    config.scaleWidthOffset = parseFloat(getWidthOffset());
-    config.scaleXOffset = parseFloat(getXOffset());
-    config.scaleYOffset = parseFloat(getYOffset());
+    var noneFacialSticker = $("#none_facial").prop('checked');
+    console.log(noneFacialSticker);
+    config.type = noneFacialSticker ? 2 : 1;
+    config.facePos = noneFacialSticker ? 0 : parseInt(getPosIndex(), 10);
+    config.scaleWidthOffset = noneFacialSticker ? 1 : parseFloat(getWidthOffset());
+    config.scaleHeightOffset = noneFacialSticker ? 1 : 0;
+    config.scaleXOffset = noneFacialSticker ? 0 : parseFloat(getXOffset());
+    config.scaleYOffset = noneFacialSticker ? 0 : parseFloat(getYOffset());
     config.frameFolder = $("#frame_folder").val();
     config.frameNum = $("#frame_num").val();
     config.frameWidth = $("#tmp").width();
     config.frameHeight = $("#tmp").height();
     stickersConfig[currentStickerIndex] = config;
-    console.log(stickersConfig);
     notify("贴纸参数保存成功", 'alert-success');
 }
 
@@ -219,9 +210,14 @@ function distance(pt1, pt2){
     return Math.sqrt(Math.pow((pt1.x - pt2.x), 2) + Math.pow((pt1.y - pt2.y), 2));
 }
 
+function refineCssStickerOnModel(){
+    var pos = calculatePos();
+    currentStickerDivDom.css("left", parseFloat(pos.x + 15)+"px").css("top", pos.y + "px").css("width", pos.width + "px");
+}
+
 function addStickerToModel(pos){
     var stickerTpl = '' +
-        '<div id="sticker_' + currentStickerIndex + '" class="active" style="z-index:99999;position:absolute;left:'+ (leftPadding + pos.x) +'px;top:' + pos.y + 'px;width:'+ pos.width +'px;">' +
+        '<div id="sticker_' + currentStickerIndex + '" class="active" style="z-index:99999;position:absolute;">' +
         '<img class="full" src="'+ selectedStickerObj.attr("src") +'"/>' +
         '</div>';
     var addedSticker = $(stickerTpl);
@@ -229,6 +225,9 @@ function addStickerToModel(pos){
 }
 
 function dragNResize(){
+    if($("#none_facial").prop("checked")){
+      return ;
+    }
     interact('#sticker_'+currentStickerIndex+'>img')
         .draggable({
             inertia: true,
@@ -286,11 +285,18 @@ function dragMoveListener (event) {
 
 
 function calculatePos(){
-    var config = pointConfig["eye"];
     var param = {};
-    param.width = parseFloat($("#tmp").width());
-    param.x = (config.center.x / standardWidth) * modelImageWidth - (param.width / 2);
-    param.y = (config.center.y / standardHeight) * modelImageHeight - ((param.width / selectedStickerObj.width() * selectedStickerObj.height()) / 2);
+    var noneFacialSticker = $("#none_facial").prop('checked');
+    if(noneFacialSticker){
+      param.x = 0;
+      param.y = 0;
+      param.width = modelImageWidth;
+    }else{
+      var config = pointConfig["eye"];
+      param.width = parseFloat($("#tmp").width());
+      param.x = (config.center.x / standardWidth) * modelImageWidth - (param.width / 2);
+      param.y = (config.center.y / standardHeight) * modelImageHeight - ((param.width / selectedStickerObj.width() * selectedStickerObj.height()) / 2);
+    }
     return param;
 }
 
@@ -307,7 +313,10 @@ function useLastStickerConfig(){
     if(stickersConfig[currentStickerIndex]){
         $("#frame_folder").val(stickersConfig[currentStickerIndex].frameFolder);
         $("#frame_num").val(stickersConfig[currentStickerIndex].frameNum);
+        $("#none_facial").prop("checked", stickersConfig[currentStickerIndex].type == 1 ? false : true);
         dragNResize();
+    }else{
+        clearPreSettings();
     }
 }
 
@@ -316,23 +325,42 @@ function standardModelOffsetWidth(){
 }
 
 function addUploadedSticker(data){
-    var tpl = '<div class="col-md-3 col-lg-3 col-sm-3 sticker-div">' +
-        '<img src="' + data.file + '" class="img-rounded full"/>' +
+    var tpl = '<div class="col-md-3 col-lg-3 col-sm-3 sticker-div" style="position:relative">' +
+        '<img src="' + data.file + '" class="img-rounded full uploaded-sticker"/>' +
+        '<img class="uploaded-delete" src="./img/delete.png" style="position:absolute;top:0px;right:20px;width:16px;"/>' +
         '</div>';
     var dom = $(tpl);
     $(".uploaded").append(dom);
-    $("img", dom).click(function(){
+    $("img.uploaded-sticker", dom).click(function(){
         currentStickerIndex = $(this).parent().index();
         stickerChosenEffect($(this).parent());
         if($("#sticker_" + currentStickerIndex).size() != 0){
             setCurrentDom();
             useLastStickerConfig();
         }else{
-            addStickerToModel(calculatePos());
+            addStickerToModel();
             setCurrentDom();
+            refineCssStickerOnModel();
             dragNResize();
         }
     });
+    $("img.uploaded-delete", dom).click(function(){
+      var removeIndex = $(this).parent().index();
+      var stickersNum = $('.uploaded>div').size();
+      $(this).parent().remove();
+      $("#sticker_" + removeIndex).remove();
+      if(stickersConfig[removeIndex]){
+        stickersConfig.remove(removeIndex);
+      }
+      for(var i=removeIndex+1; i < stickersNum; i++){
+        $("#sticker_"+i).attr("id", "sticker_"+ parseInt(i-1));
+      }
+    })
+}
+
+function clearPreSettings(){
+  $("input.sticker-param").val("");
+  $("input#none_facial").prop("checked", false);
 }
 
 function setCurrentDom(){
@@ -372,3 +400,9 @@ function notify(message, type){
         $(".message").removeClass(type);
     }, 2000);
 }
+
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
+};
