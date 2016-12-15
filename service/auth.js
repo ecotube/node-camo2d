@@ -1,8 +1,10 @@
 require('../model/partners');
+require('../model/partner_devices');
+var config = require('../config.js');
 var mongoose = require('mongoose');
 var Partner = mongoose.model('Partner');
+var PartnerDevice = mongoose.model('PartnerDevice');
 var Q = require('q');
-var key = 'camo2d-sdk-2016';
 var aes = require('nodejs-aes256');
 var crypto = require('crypto');
 
@@ -14,26 +16,30 @@ function authPartner(req){
       return deferred.promise;
     }
 
-    var bundleId = aes.decrypt(key, req.header('x-access-key'));
+    var bundleId = aes.decrypt(config.cipher_key, req.header('x-access-key'));
     var curDate = new Date().toLocaleDateString();
 
     var query = Partner.findOne({
-       isActive: true,
-       bundleId: bundleId,
-       effectiveFrom: {$lte: curDate},
-       effectiveEnded: {$gte: curDate}
+      isActive: true,
+      bundleId: bundleId,
+      effectiveFrom: {$lte: curDate},
+      effectiveEnded: {$gte: curDate}
     });
     query.exec(function(err, partner){
-        if(err){ deferred.reject({status: 503})};
-        if(partner === null || req.header('x-bundle-id') != partner.bundleId){
-          deferred.reject({status: 401})
-        }
+      if(err) deferred.reject({status: 503});
+      if(partner === null || req.header('x-bundle-id') != partner.bundleId){
+        deferred.reject({status: 401})
+      }else{
         var md5 = crypto.createHash('md5');
         md5.update(bundleId + req.header('device-id') + curDate);
         partner.accessToken = md5.digest('hex');
         partner.save();
-        deferred.resolve(partner);
-      });
+        var record = new PartnerDevice({deviceId: req.header('device-id'), bundleId: req.header('x-bundle-id')});
+        record.save();
+        var re = {token: partner.accessToken, scope: partner.permissionScope, co_name: partner.coName};
+        deferred.resolve(re);
+      }
+    });
     return deferred.promise;
 };
 

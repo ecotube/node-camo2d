@@ -22,8 +22,8 @@ function generateFile(reqBody){
     var params = '';
     // temporary solution
     for(var key in reqBody){ params = JSON.parse(key);}
+    console.log(params);
     for(var i in params){
-        params[i].scaleHeigthtOffset = 0;
         params[i].alignPos = 0;
         params[i].alignX = 0;
         params[i].alignY = 0;
@@ -32,7 +32,7 @@ function generateFile(reqBody){
     }
     jsonfile.writeFile(path.join(__dirname, '../public/config.json'), params, function (err) {
         if(err){ deferred.reject(err) };
-        deferred.resolve({});
+        else{ deferred.resolve({}) };
     })
     return deferred.promise;
 }
