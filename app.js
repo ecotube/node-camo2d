@@ -27,14 +27,7 @@ app.use('/', routes);
 app.use('/partners', partners);
 app.use('/stickers', stickers);
 app.use('/members', members);
-
-// only for upload media files
-var multipart = require('connect-multiparty');
-var multipartMiddleware = multipart();
-var Uploader = require('./service/uploader');
-app.post('/media', multipartMiddleware, function(req, res, next){
-   Uploader.upload(res, req.files.media.path, new Date().getTime() + '_' + req.files.media.originalFilename);
-});
+app.use('/media', media)
 
 // only for download configure file
 app.get('/download/:name', function(req, res, next) {

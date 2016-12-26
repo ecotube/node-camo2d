@@ -33,4 +33,14 @@ router.post('/config', function(req, res, next) {
     })
 });
 
+router.post('/', function(req, res, next) {
+    StickerService.addOne(req)
+    .fail(function(err){
+      res.status(err.status).end();
+    })
+    .then(function(data){
+      res.json(data);
+    })
+});
+
 module.exports = router;

@@ -66,8 +66,12 @@ var pointConfig = {
 $(document).ready(function(){
     setModelParam();
     // upload sticker
-    $("#uploader").click(function(){ $("#media").click();});
-    $(document).on('change', 'input#media', function(){ ajaxFileUpload(); });
+    $("#stickers-part").click(function(){ $("#stickers-part-upload").click();});
+    $("#resource").click(function(){ $("#resource-upload").click();});
+    $("#avatar").click(function(){ $("#avatar-upload").click();});
+    $(document).on('change', 'input#stickers-part-upload', function(){ ajaxFileUpload('/media/stickers/part','stickers-part-upload', function(data, status){addUploadedSticker(data)}); });
+    $(document).on('change', 'input#avatar-upload', function(){ ajaxFileUpload('/media/stickers/avatar','avatar-upload', function(data,status){showUploadedAvatar(data)}); });
+    $(document).on('change', 'input#resource-upload', function(){ ajaxFileUpload('/media/stickers/resource', 'resource-upload', function(data, status){showUploadedZip(data)}); });
 
     // finish buttons click events
     $("#fin").click(function(){ finishSticker();});
@@ -90,7 +94,54 @@ $(document).ready(function(){
     $("#none_facial").click(function(){
       refineCssStickerOnModel();
     })
+
+    // menu
+    $(".menu>li").click(function(){
+      $(this).addClass('active');
+      $(this).siblings().removeClass('active')
+    })
+    $("#series").click(function(){
+      $("#div-series").show();
+      $("#div-configs").hide();
+    })
+    $("#configs").click(function(){
+      $("#div-configs").show()
+      $("#div-series").hide();
+    })
+    $("#brands, #titles").click(function(){
+      location.reload();
+    })
+    $("#series-complete").click(function(){
+      addStickerSeries();
+    })
 });
+
+function addStickerSeries(){
+  var data = {}
+  data.avatar_url = $.trim($("#avatar_url").html().split(" ")[1]);
+  data.resource_url = $.trim($("#resource_url").html().split(" ")[1]);
+  data.name = $("input#series-name").val();
+  $.ajax({
+      url: '/stickers',
+      method: 'POST',
+      dataType: 'json',
+      data: data,
+      success: function(data, textStatus, jqXHR){
+         notify('贴纸保存成功！', "alert-success");
+      },
+      error: function(){
+          notify('上传错误, 请稍后再试');
+      }
+  })
+}
+
+function showUploadedAvatar(data){
+  $("#avatar_url").text('示意图地址 ' + data.file);
+}
+
+function showUploadedZip(data){
+  $("#resource_url").text('贴纸压缩包地址 ' + data.file);
+}
 
 function noActiveSticker(){
     if($(".uploaded>.active").size() == 0) {
@@ -118,6 +169,7 @@ function uploadConfig(){
         data: JSON.stringify(stickersConfig),
         success: function(data, textStatus, jqXHR){
             window.location.href = '/download/config.json';
+
         },
         error: function(){
             notify('上传错误, 请稍后再试');
@@ -128,7 +180,6 @@ function uploadConfig(){
 function finishSticker(){
     var config = {};
     var noneFacialSticker = $("#none_facial").prop('checked');
-    console.log(noneFacialSticker);
     config.type = noneFacialSticker ? 2 : 1;
     config.facePos = noneFacialSticker ? 0 : parseInt(getPosIndex(), 10);
     config.scaleWidthOffset = noneFacialSticker ? 1 : parseFloat(getWidthOffset());
@@ -368,18 +419,15 @@ function setCurrentDom(){
     currentStickerImgDom = currentStickerDivDom.children('img');
 }
 
-function ajaxFileUpload() {
+function ajaxFileUpload(url, elementId, successFunc) {
     $.ajaxFileUpload
     (
         {
-            url: '/media', //用于文件上传的服务器端请求地址
+            url: url, //用于文件上传的服务器端请求地址
             secureuri: false, //是否需要安全协议，一般设置为false
-            fileElementId: 'media', //文件上传域的ID
+            fileElementId: elementId, //文件上传域的ID
             dataType: 'json', //返回值类型 一般设置为json
-            success: function (data, status)  //服务器成功响应处理函数
-            {
-                addUploadedSticker(data);
-            },
+            success: successFunc,
             error: function (data, status, e)//服务器响应失败处理函数
             {
                 notify("上传失败，请重试！");

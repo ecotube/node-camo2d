@@ -49,9 +49,9 @@ function authAccess(req){
        deferred.reject({status: 401});
        return deferred.promise;
     }
-    Partner.findOne({accessToken: req.header('access-token')}, function(err, partner){
+    Partner.findOne({accessToken: req.header('access-token'), isActive: true}, function(err, partner){
       if(err){ deferred.reject({status: 503})};
-      if(partner === null){deferred.reject({status: 401})};
+      if(partner === null || !partner.permissionScope.stickers){ deferred.reject({status: 401}) };
       deferred.resolve();
     })
     return deferred.promise;

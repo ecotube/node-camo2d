@@ -3,7 +3,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.json({camo: 'welcome'});
+  res.json({kiwiapps: 'welcome'});
 });
 
 module.exports = router;

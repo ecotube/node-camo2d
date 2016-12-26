@@ -7,15 +7,34 @@
 	<link href="./css/bootstrap.min.css" rel="stylesheet">
 	<style>
 		.ratio-digit{padding-left:0px;}body{font-family:century;color:#716f6f;font-size:14px}img.full{width:100%}.top-2{margin-top:2%}.top-5{margin-top:5%}.bottom-5{margin-bottom:5%}.left-2{margin-left:2%}.uploaded{background-color:#eee;border-radius:10px;margin-left:2%}.uploaded img{cursor:pointer;padding:20px 0}.center-select{padding-left:2%}#parameter{margin-left:2%}.bigfont{font-size:18px}.sticker-div{border-radius:2px}
+		.navbar-default{background:#5e5f6d;border:none;border-radius:0px}.navbar-nav>li>a{padding-left:40px;padding-right:40px;}.navbar{margin-bottom:0px}.navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:hover, .navbar-default .navbar-nav>.active>a:focus{background-color:#66a5d4}
 	</style>
 </head>
 <body>
 	<div class="navbar-fixed-top alert alert-dismissible fade in text-center message" style="display:none">
 	</div>
-	<div class="page-header text-center">
-		<h1>Sticker Automated Deployment Tool<small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a target="_blank" class="btn btn-xs btn-info" href="http://ofso95tts.bkt.clouddn.com/kiwiapps%20%E8%B4%B4%E7%BA%B8%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.pdf?v=20161213">查看使用说明文档</a></small></h1>
-	</div>
-	<div class="row main">
+	<nav class="navbar navbar-default fixed-top" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="javascript:void(0)" id="brands">
+          <img alt="Brand" src="./img/kiwi-logo.png" width="22px" id="home">
+        </a>
+      </div>
+			<div class="collapse navbar-collapse" style="float:left">
+				<ul class="nav navbar-nav" id="titles">
+          <li style="none"><a href="javascript:void(0)" style="padding-left:0;padding-right:0;font-weight:800;color:white;font-size:20px">贴纸工具</a></li>
+        </ul>
+			</div>
+      <div class="collapse navbar-collapse" style="float:right">
+        <ul class="nav navbar-nav menu">
+          <li id="configs" class="active"><a href="javascript:void(0)" style="color:white">配置文件工具</a></li>
+          <li id="series"><a href="javascript:void(0)" style="color:white">上传工具</a></li>
+          <li><a href="#" style="color:white">文档</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+	<div class="row top-2" id="div-configs" >
 		<div class="col-md-5 col-lg-5 col-sm-5 col-xs-12" id="model" style="position:relative">
 			<img src="./img/modelfe.png" id="model-image" class="img-rounded"/>
 		</div>
@@ -24,8 +43,8 @@
 				<p class="bigfont left-2">上传贴纸</p>
 				<div class="row top-2">
 					<div class="col-md-2 col-lg-2 col-sm-2">
-						<img src="./img/upload.png" class="img-thumbnail full" id="uploader"/>
-						<input id="media" class="hidden" type="file" name="media"/>
+						<img src="./img/upload.png" class="img-thumbnail full" id="stickers-part"/>
+						<input id="stickers-part-upload" class="hidden" type="file" name="spart"/>
 					</div>
 					<div class="col-md-10 col-lg-10 col-sm-10 text-right">
 
@@ -56,14 +75,6 @@
 					    </label>
 					  </div>
 					</div>
-					<!-- <div class="col-md-9 col-sm-9 col-lg-9 ratio-digit">
-						<div class="col-md-6 col-sm-6 col-lg-6">
-							<input type="text" class="form-control" placeholder="宽度比例（0-1小数）"/>
-						</div>
-						<div class="col-md-6 col-sm-6 col-lg-6 ratio-digit">
-							<input type="text" class="form-control" placeholder="宽度比例（0-1小数）"/>
-						</div>
-					</div> -->
 				</div>
 				<p class="top-5">2. 填入必要参数</p>
 				<div class="row">
@@ -88,6 +99,54 @@
 					</div>
 				</div>
 			</div>
+		</div>
+	</div>
+	<div id="div-series" style="" class="row">
+		<div class="row top-2">
+			<div class="col-md-1 col-lg-1 col-sm-1"></div>
+			<div class="col-md-10 col-lg-10 col-sm-10">
+				<h4>1. 上传贴纸示意图</h4>
+				<br/>
+				<div class="col-md-1 col-lg-1 col-sm-1">
+					<img src="./img/upload.png" class="img-thumbnail full" id="avatar"/>
+					<input id="avatar-upload" class="hidden" type="file" name="avatar"/>
+				</div>
+				<div class="col-md-11 col-lg-11 col-sm-11">
+					<span class="label label-default" id="avatar_url"></span>
+				</div>
+			</div>
+			<div class="col-md-1 col-lg-1 col-sm-1"></div>
+		</div>
+		<div class="row top-2">
+			<div class="col-md-1 col-lg-1 col-sm-1"></div>
+			<div class="col-md-10 col-lg-10 col-sm-10">
+				<h4>2. 上传整理好的贴纸压缩包</h4>
+				<br/>
+				<div class="col-md-1 col-lg-1 col-sm-1">
+					<img src="./img/upload.png" class="img-thumbnail full" id="resource"/>
+					<input id="resource-upload" class="hidden" type="file" name="resource"/>
+				</div>
+				<div class="col-md-11 col-lg-11 col-sm-11">
+					<span class="label label-default" id="resource_url" style></span>
+				</div>
+			</div>
+			<div class="col-md-1 col-lg-1 col-sm-1"></div>
+		</div>
+		<div class="row top-2">
+			<div class="col-md-1 col-lg-1 col-sm-1"></div>
+			<div class="col-md-10 col-lg-10 col-sm-10">
+				<h4>3. 填入贴纸名字</h4>
+				<br/>
+				<input id="series-name" type="text" class="form-control" placeholder="填入此套贴纸名字"/>
+			</div>
+			<div class="col-md-1 col-lg-1 col-sm-1"></div>
+		</div>
+		<div class="row top-2">
+			<div class="col-md-2 col-lg-2 col-sm-2"></div>
+			<div class="col-md-8 col-lg-8 col-sm-8">
+				<button class="btn btn-info" style="width:100%" id="series-complete">完成一套贴纸</button>
+			</div>
+			<div class="col-md-2 col-lg-2 col-sm-2"></div>
 		</div>
 	</div>
 
