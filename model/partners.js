@@ -4,8 +4,8 @@ var partnerSchema = new mongoose.Schema({
   appName: String,
   contactNo: String,
   bundleId: String,
-  effectiveFrom: String,
-  effectiveEnded: String,
+  effectiveFrom: Date,
+  effectiveEnded: Date,
   accessToken: {type: String, default: ''},
   isActive: {type: Boolean, default: false},
   permissionScope : {

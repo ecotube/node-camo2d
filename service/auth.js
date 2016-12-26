@@ -17,7 +17,8 @@ function authPartner(req){
     }
 
     var bundleId = aes.decrypt(config.cipher_key, req.header('x-access-key'));
-    var curDate = new Date().toLocaleDateString();
+    var curDate = new Date();
+    console.log(curDate);
 
     var query = Partner.findOne({
       isActive: true,
